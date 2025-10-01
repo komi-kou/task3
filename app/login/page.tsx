@@ -32,8 +32,9 @@ export default function LoginPage() {
 
       if (result?.error) {
         setError("メールアドレスまたはパスワードが正しくありません")
-      } else {
-        router.push("/dashboard")
+      } else if (result?.ok) {
+        // セッションが確立されるまで少し待ってからリダイレクト
+        window.location.href = "/dashboard"
       }
     } else {
       try {
@@ -44,12 +45,16 @@ export default function LoginPage() {
         })
 
         if (res.ok) {
-          await signIn("credentials", {
+          const signInResult = await signIn("credentials", {
             email,
             password,
             redirect: false,
           })
-          router.push("/dashboard")
+          
+          if (signInResult?.ok) {
+            // セッションが確立されるまで少し待ってからリダイレクト
+            window.location.href = "/dashboard"
+          }
         } else {
           const data = await res.json()
           setError(data.error || "登録に失敗しました")
