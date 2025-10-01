@@ -1,0 +1,21 @@
+From 530a4a909aa63d0fc0bb31a67882eb822f9d87da Mon Sep 17 00:00:00 2001
+From: komi-kou <komiya11122@gmail.com>
+Date: Wed, 1 Oct 2025 20:06:48 +0900
+Subject: [PATCH] Automated deployment - 2025-10-01 20:06:48
+
+---
+ .git-askpass | 2 ++
+ 1 file changed, 2 insertions(+)
+ create mode 100755 .git-askpass
+
+diff --git a/.git-askpass b/.git-askpass
+new file mode 100755
+index 0000000..61d6ce3
+--- /dev/null
++++ b/.git-askpass
+@@ -0,0 +1,2 @@
++#!/bin/bash
++echo "temporary_token"
+-- 
+2.46.0
+
