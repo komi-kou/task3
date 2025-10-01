@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
-    "start": "next start",
+    "start": "node scripts/init-production.js && next start",
+    "start:prod": "next start",
     "lint": "eslint .",
     "postinstall": "prisma generate || echo 'Skipping prisma generate'",
     "prisma:push": "prisma db push",
