@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "build:local": "npx prisma generate && next build",
-    "start": "prisma db push && next start",
+    "start": "next start",
     "lint": "eslint .",
     "postinstall": "prisma generate",
     "prisma:push": "prisma db push",
