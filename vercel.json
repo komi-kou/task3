@@ -1,0 +1,12 @@
+{
+  "buildCommand": "npx prisma generate && npm run build",
+  "outputDirectory": ".next",
+  "devCommand": "next dev",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "build": {
+    "env": {
+      "NODE_ENV": "production"
+    }
+  }
+}

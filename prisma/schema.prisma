@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String        @id @default(cuid())
+  email         String        @unique
+  password      String
+  name          String?
+  role          String        @default("user")
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  customers     Customer[]
+  leads         Lead[]
+  opportunities Opportunity[]
+  tasks         Task[]
+}
+
+model Customer {
+  id              String        @id @default(cuid())
+  name            String
+  email           String?
+  phone           String?
+  company         String?
+  address         String?
+  status          String        @default("active")
+  notes           String?
+  contractDate    DateTime?
+  contractAmount  Float         @default(0)
+  contractDetails String?
+  industry        String?
+  employeeCount   Int?
+  annualRevenue   Float?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  userId          String
+  contacts        Contact[]
+  user            User          @relation(fields: [userId], references: [id])
+  opportunities   Opportunity[]
+  tasks           Task[]
+}
+
+model Contact {
+  id         String   @id @default(cuid())
+  name       String
+  email      String?
+  phone      String?
+  position   String?
+  notes      String?
+  customerId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  customer   Customer @relation(fields: [customerId], references: [id])
+}
+
+model Task {
+  id           String    @id @default(cuid())
+  title        String
+  description  String?
+  status       String    @default("not_started") // not_started, in_progress, completed, on_hold, cancelled
+  priority     String    @default("medium")
+  dueDate      DateTime?
+  startDate    DateTime?
+  completedAt  DateTime?
+  estimatedHours Float?
+  actualHours  Float?
+  assignee     String?   // 担当者名
+  category     String?   // タスクカテゴリ（開発、設計、テスト、ミーティング等）
+  tags         String?   // カンマ区切りのタグ
+  progress     Int       @default(0) // 進捗率 0-100
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  userId       String
+  customerId   String?
+  customer     Customer? @relation(fields: [customerId], references: [id])
+  user         User      @relation(fields: [userId], references: [id])
+}
+
+model Lead {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  company   String?
+  source    String?
+  status    String   @default("new")
+  notes     String?
+  score     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Opportunity {
+  id          String    @id @default(cuid())
+  name        String
+  amount      Float?
+  stage       String    @default("qualification")
+  probability Int       @default(0)
+  closeDate   DateTime?
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userId      String
+  customerId  String?
+  customer    Customer? @relation(fields: [customerId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+}

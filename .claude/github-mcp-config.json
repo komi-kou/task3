@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "github_pat_YOUR_TOKEN_HERE"
+      }
+    },
+    "git": {
+      "command": "npx",
+      "args": [
+        "-y", 
+        "@modelcontextprotocol/server-git",
+        "--repository", 
+        "/Users/komiyakouhei/Desktop/タスク管理ツール/crm-task-manager 2"
+      ]
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/komiyakouhei/Desktop/タスク管理ツール/crm-task-manager 2"
+      ]
+    }
+  }
+}

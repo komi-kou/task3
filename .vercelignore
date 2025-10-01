@@ -1,0 +1,17 @@
+.git
+node_modules
+.next
+.env.local
+*.log
+prisma/dev.db
+prisma/dev.db-journal
+README*.md
+*.yaml
+*.json
+!package.json
+!tsconfig.json
+!vercel.json
+test-*.js
+seed-*.ts
+*.レポート.md
+*.md

@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "render": {
+      "command": "npx",
+      "args": ["-y", "@renderco/mcp-server-render"],
+      "env": {
+        "RENDER_API_KEY": "rnd_Kn3ARDuhww3ALGxrSA6QmFzpNuog"
+      }
+    }
+  }
+}
