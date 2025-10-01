@@ -4,13 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && prisma db push && next build",
+    "build": "prisma generate && next build",
     "build:local": "npx prisma generate && next build",
-    "start": "next start",
+    "start": "prisma db push && next start",
     "lint": "eslint .",
     "postinstall": "prisma generate",
     "prisma:push": "prisma db push",
     "prisma:generate": "prisma generate",
+    "prisma:seed": "node init-db.js",
     "deploy": "./deploy.sh"
   },
   "engines": {
