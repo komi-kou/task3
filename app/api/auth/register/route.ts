@@ -2,14 +2,24 @@ import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import { PrismaClient } from "@prisma/client"
 
-// 各リクエストで新しいPrismaClientインスタンスを作成
+// ꯨ��g�WDPrismaClient���\
 async function getDbClient() {
+  const databaseUrl = process.env.DATABASE_URL
+  console.log('Register - Database URL configured:', databaseUrl ? 'Yes' : 'No')
+  console.log('Register - NODE_ENV:', process.env.NODE_ENV)
+  
   const prisma = new PrismaClient({
     log: ['error', 'warn'],
+    datasources: {
+      db: {
+        url: databaseUrl
+      }
+    }
   })
   
   try {
     await prisma.$connect()
+    console.log('Register - Database connected successfully')
     return prisma
   } catch (error) {
     console.error('Failed to connect to database:', error)
@@ -24,58 +34,59 @@ export async function POST(req: Request) {
     const body = await req.json()
     const { email, password, name } = body
 
-    // バリデーション
+    // �������
     if (!email || !password) {
       return NextResponse.json(
-        { error: "メールアドレスとパスワードは必須です" },
+        { error: "�����hѹ���o�gY" },
         { status: 400 }
       )
     }
 
-    // メールアドレスの形式チェック
+    // �����nb��ï
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(email)) {
       return NextResponse.json(
-        { error: "有効なメールアドレスを入力してください" },
+        { error: "	�j����칒e�WfO`UD" },
         { status: 400 }
       )
     }
 
-    // パスワードの長さチェック
+    // ѹ���nwU��ï
     if (password.length < 6) {
       return NextResponse.json(
-        { error: "パスワードは6文字以上で入力してください" },
+        { error: "ѹ���o6�W�
+ge�WfO`UD" },
         { status: 400 }
       )
     }
 
-    // データベース接続
+    // ��������
     try {
       prisma = await getDbClient()
     } catch (error) {
       console.error('Database connection error:', error)
       return NextResponse.json(
-        { error: "データベースに接続できません。しばらく待ってから再試行してください" },
+        { error: "������k��gM~[�Wp�O�cfK��fLWfO`UD" },
         { status: 503 }
       )
     }
 
-    // 既存ユーザーチェック
+    // �X������ï
     const existingUser = await prisma.user.findUnique({
       where: { email: email.toLowerCase() }
     })
 
     if (existingUser) {
       return NextResponse.json(
-        { error: "このメールアドレスは既に登録されています" },
+        { error: "Sn�����o�k{2U�fD~Y" },
         { status: 400 }
       )
     }
 
-    // パスワードのハッシュ化
+    // ѹ���n�÷�
     const hashedPassword = await bcrypt.hash(password, 12)
 
-    // ユーザー作成
+    // ����\
     const user = await prisma.user.create({
       data: {
         email: email.toLowerCase(),
@@ -93,7 +104,7 @@ export async function POST(req: Request) {
     })
 
     return NextResponse.json({
-      message: "登録が完了しました",
+      message: "{2L��W~W_",
       user: {
         id: user.id,
         email: user.email,
@@ -105,24 +116,24 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("Registration error:", error)
     
-    // Prismaエラーの詳細な処理
+    // Prisma���ns0j�
     if (error.code === 'P2002') {
       return NextResponse.json(
-        { error: "このメールアドレスは既に使用されています" },
+        { error: "Sn�����o�k(U�fD~Y" },
         { status: 400 }
       )
     }
     
     if (error.code === 'P2021' || error.code === 'P2022') {
       return NextResponse.json(
-        { error: "データベースが初期化されていません。管理者に連絡してください" },
+        { error: "������LU�fD~[��k#aWfO`UD" },
         { status: 500 }
       )
     }
     
     return NextResponse.json(
       { 
-        error: "登録処理中にエラーが発生しました",
+        error: "{2�-k���LzW~W_",
         details: process.env.NODE_ENV === 'development' ? error.message : undefined
       },
       { status: 500 }

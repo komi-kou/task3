@@ -14,8 +14,17 @@ export async function GET(req: Request) {
     )
   }
 
+  const databaseUrl = process.env.DATABASE_URL
+  console.log('Init - Database URL configured:', databaseUrl ? 'Yes' : 'No')
+  console.log('Init - NODE_ENV:', process.env.NODE_ENV)
+  
   const prisma = new PrismaClient({
     log: ['query', 'error', 'warn'],
+    datasources: {
+      db: {
+        url: databaseUrl
+      }
+    }
   })
 
   try {

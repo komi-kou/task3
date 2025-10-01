@@ -2,8 +2,17 @@ import { NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
 
 export async function GET(req: Request) {
+  const databaseUrl = process.env.DATABASE_URL
+  console.log('Health - Database URL configured:', databaseUrl ? 'Yes' : 'No')
+  console.log('Health - NODE_ENV:', process.env.NODE_ENV)
+  
   const prisma = new PrismaClient({
     log: ['error', 'warn'],
+    datasources: {
+      db: {
+        url: databaseUrl
+      }
+    }
   })
 
   try {
