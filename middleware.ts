@@ -3,9 +3,20 @@ import { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 
 export async function middleware(request: NextRequest) {
-  const token = await getToken({ req: request })
+  // getTokenにsecretを指定
+  const token = await getToken({ 
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET 
+  })
+  
   const isAuth = !!token
   const isAuthPage = request.nextUrl.pathname.startsWith('/login')
+  const isApiAuthRoute = request.nextUrl.pathname.startsWith('/api/auth')
+  
+  // API認証ルートは常に許可
+  if (isApiAuthRoute) {
+    return NextResponse.next()
+  }
   
   if (isAuthPage) {
     if (isAuth) {
@@ -30,11 +41,14 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/dashboard/:path*',
-    '/customers/:path*',
-    '/tasks/:path*',
-    '/leads/:path*',
-    '/opportunities/:path*',
-    '/login',
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api/auth (authentication routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     */
+    '/((?!api/auth|_next/static|_next/image|favicon.ico).*)',
   ],
 }
