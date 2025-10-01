@@ -5,13 +5,15 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
-    "start": "node scripts/init-production.js && next start",
-    "start:prod": "next start",
+    "start": "next start",
+    "start:with-init": "node scripts/init-db.js && next start",
     "lint": "eslint .",
-    "postinstall": "prisma generate || echo 'Skipping prisma generate'",
+    "postinstall": "prisma generate",
     "prisma:push": "prisma db push",
     "prisma:generate": "prisma generate",
-    "setup": "node scripts/setup-dev.js"
+    "prisma:studio": "prisma studio",
+    "db:init": "node scripts/init-db.js",
+    "setup:local": "prisma db push && node scripts/init-db.js"
   },
   "dependencies": {
     "@next-auth/prisma-adapter": "^1.0.7",

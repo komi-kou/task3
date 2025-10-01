@@ -1,21 +1,49 @@
-const { execSync } = require('child_process');
+const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs');
 
-console.log('🚀 初回本番環境セットアップ開始...');
+const prisma = new PrismaClient();
 
-try {
-  // Prismaデータベーススキーマを適用
-  console.log('📊 データベーススキーマを適用中...');
-  execSync('npx prisma db push', { stdio: 'inherit' });
+async function main() {
+  console.log('🚀 Production database initialization...');
   
-  console.log('✅ データベースセットアップ完了');
-  
-  // テストユーザーを作成
-  console.log('👤 テストユーザーを作成中...');
-  require('../init-db.js');
-  
-} catch (error) {
-  console.error('❌ セットアップエラー:', error);
-  // エラーがあっても続行（既にデータベースが初期化されている場合があるため）
+  try {
+    // データベース接続テスト
+    await prisma.$connect();
+    console.log('✅ Database connected');
+    
+    // テストユーザーを確認/作成
+    const existingUser = await prisma.user.findUnique({
+      where: { email: 'admin@example.com' }
+    });
+    
+    if (!existingUser) {
+      const hashedPassword = await bcrypt.hash('admin123', 10);
+      
+      await prisma.user.create({
+        data: {
+          email: 'admin@example.com',
+          password: hashedPassword,
+          name: '管理者',
+          role: 'admin'
+        }
+      });
+      
+      console.log('✅ Admin user created');
+      console.log('   Email: admin@example.com');
+      console.log('   Password: admin123');
+    } else {
+      console.log('ℹ️ Admin user already exists');
+    }
+    
+  } catch (error) {
+    console.error('❌ Error:', error);
+    // エラーがあっても続行
+  } finally {
+    await prisma.$disconnect();
+  }
 }
 
-console.log('🎉 初期化完了！');
+// 実行
+main().then(() => {
+  console.log('🎉 Initialization complete!');
+}).catch(console.error);
