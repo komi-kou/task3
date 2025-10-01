@@ -1,6 +1,6 @@
 import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-import prisma from "./prisma"
+import { PrismaClient } from "@prisma/client"
 import bcrypt from "bcryptjs"
 
 export const authOptions: NextAuthOptions = {
@@ -27,7 +27,14 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
+        // 新しいPrismaClientインスタンスを作成
+        const prisma = new PrismaClient({
+          log: ['error', 'warn'],
+        })
+
         try {
+          await prisma.$connect()
+          
           const user = await prisma.user.findUnique({
             where: {
               email: credentials.email.toLowerCase()
@@ -60,6 +67,8 @@ export const authOptions: NextAuthOptions = {
         } catch (error) {
           console.error("Auth error:", error)
           return null
+        } finally {
+          await prisma.$disconnect()
         }
       }
     })

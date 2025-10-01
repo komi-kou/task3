@@ -1,9 +1,24 @@
 import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
-import prisma from "@/lib/prisma"
+import { PrismaClient } from "@prisma/client"
+
+// 各リクエストで新しいPrismaClientインスタンスを作成
+async function getDbClient() {
+  const prisma = new PrismaClient({
+    log: ['error', 'warn'],
+  })
+  
+  try {
+    await prisma.$connect()
+    return prisma
+  } catch (error) {
+    console.error('Failed to connect to database:', error)
+    throw error
+  }
+}
 
 export async function POST(req: Request) {
-  let responseData = null
+  let prisma: PrismaClient | null = null
   
   try {
     const body = await req.json()
@@ -31,6 +46,17 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { error: "パスワードは6文字以上で入力してください" },
         { status: 400 }
+      )
+    }
+
+    // データベース接続
+    try {
+      prisma = await getDbClient()
+    } catch (error) {
+      console.error('Database connection error:', error)
+      return NextResponse.json(
+        { error: "データベースに接続できません。しばらく待ってから再試行してください" },
+        { status: 503 }
       )
     }
 
@@ -66,7 +92,7 @@ export async function POST(req: Request) {
       }
     })
 
-    responseData = {
+    return NextResponse.json({
       message: "登録が完了しました",
       user: {
         id: user.id,
@@ -74,9 +100,7 @@ export async function POST(req: Request) {
         name: user.name,
         role: user.role
       }
-    }
-
-    return NextResponse.json(responseData, { status: 201 })
+    }, { status: 201 })
 
   } catch (error: any) {
     console.error("Registration error:", error)
@@ -89,24 +113,10 @@ export async function POST(req: Request) {
       )
     }
     
-    if (error.code === 'P2021') {
+    if (error.code === 'P2021' || error.code === 'P2022') {
       return NextResponse.json(
-        { error: "データベースが初期化されていません" },
+        { error: "データベースが初期化されていません。管理者に連絡してください" },
         { status: 500 }
-      )
-    }
-    
-    if (error.code === 'P2024' || error.message?.includes('timed out')) {
-      return NextResponse.json(
-        { error: "データベース接続がタイムアウトしました。しばらく待ってから再試行してください" },
-        { status: 503 }
-      )
-    }
-    
-    if (error.message?.includes('connect') || error.message?.includes('closed')) {
-      return NextResponse.json(
-        { error: "データベースに接続できません。しばらく待ってから再試行してください" },
-        { status: 503 }
       )
     }
     
@@ -117,5 +127,9 @@ export async function POST(req: Request) {
       },
       { status: 500 }
     )
+  } finally {
+    if (prisma) {
+      await prisma.$disconnect()
+    }
   }
 }
