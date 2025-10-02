@@ -1,6 +1,6 @@
 import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-import { PrismaClient } from "@prisma/client"
+import prisma from "./prisma"
 import bcrypt from "bcryptjs"
 
 export const authOptions: NextAuthOptions = {
@@ -27,24 +27,7 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
-        // 新しいPrismaClientインスタンスを作成
-        const databaseUrl = process.env.DATABASE_URL
-        console.log('Auth - Database URL configured:', databaseUrl ? 'Yes' : 'No')
-        console.log('Auth - NODE_ENV:', process.env.NODE_ENV)
-        
-        const prisma = new PrismaClient({
-          log: ['query', 'error', 'warn'],
-          datasources: {
-            db: {
-              url: databaseUrl
-            }
-          }
-        })
-
         try {
-          await prisma.$connect()
-          console.log('Auth - Database connected successfully')
-          
           const user = await prisma.user.findUnique({
             where: {
               email: credentials.email.toLowerCase()
@@ -77,8 +60,6 @@ export const authOptions: NextAuthOptions = {
         } catch (error) {
           console.error("Auth error:", error)
           return null
-        } finally {
-          await prisma.$disconnect()
         }
       }
     })
