@@ -50,3 +50,4 @@ prisma/*.db-journal
 
 # prisma migrations (optional for dev)
 /prisma/migrations/dev.db*
+node_modules.backup/
