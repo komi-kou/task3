@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "build:render": "prisma generate && prisma db push --skip-generate && next build",
     "start": "next start",
     "start:with-init": "node scripts/init-db.js && next start",
