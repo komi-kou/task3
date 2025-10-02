@@ -11,7 +11,7 @@ export const config = {
     "/dashboard/:path*",
     "/customers/:path*",
     "/tasks/:path*",
-    "/leads/:path*",
-    "/opportunities/:path*",
+    "/api/customers/:path*",
+    "/api/tasks/:path*",
   ],
 }
