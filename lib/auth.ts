@@ -1,19 +1,11 @@
 import { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-import prisma from "./prisma"
+import { prisma } from "./db"
 import bcrypt from "bcryptjs"
 
 export const authOptions: NextAuthOptions = {
-  secret: process.env.NEXTAUTH_SECRET || "development-secret-key-change-in-production",
+  secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === "development",
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-  },
-  pages: {
-    signIn: "/login",
-    error: "/login",
-  },
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -22,21 +14,19 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          console.error("Auth: Missing credentials")
-          return null
-        }
-
         try {
+          if (!credentials?.email || !credentials?.password) {
+            throw new Error("Email and password are required")
+          }
+
           const user = await prisma.user.findUnique({
             where: {
-              email: credentials.email.toLowerCase()
+              email: credentials.email
             }
           })
 
-          if (!user) {
-            console.error("Auth: User not found:", credentials.email)
-            return null
+          if (!user || !user.password) {
+            throw new Error("User not found")
           }
 
           const isPasswordValid = await bcrypt.compare(
@@ -45,16 +35,13 @@ export const authOptions: NextAuthOptions = {
           )
 
           if (!isPasswordValid) {
-            console.error("Auth: Invalid password for:", credentials.email)
-            return null
+            throw new Error("Invalid password")
           }
 
-          console.log("Auth: Successful login for:", credentials.email)
-          
           return {
             id: user.id,
             email: user.email,
-            name: user.name || user.email,
+            name: user.name,
             role: user.role
           }
         } catch (error) {
@@ -64,21 +51,24 @@ export const authOptions: NextAuthOptions = {
       }
     })
   ],
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+  pages: {
+    signIn: "/login",
+  },
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id
-        token.email = user.email
-        token.name = user.name
         token.role = user.role
       }
       return token
     },
     async session({ session, token }) {
-      if (token && session.user) {
+      if (session.user) {
         session.user.id = token.id as string
-        session.user.email = token.email as string
-        session.user.name = token.name as string
         session.user.role = token.role as string
       }
       return session
